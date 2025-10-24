@@ -93,12 +93,31 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    return data.data.target_url;
+                    return {
+                        target_url: data.data.target_url,
+                        loading_time: data.data.loading_time || 3
+                    };
                 } else {
                     throw new Error(data.error || '获取嵌入信息失败');
                 }
             } catch (error) {
                 throw new Error('网络请求失败: ' + error.message);
+            }
+        }
+        
+        // 获取全局设置
+        async function fetchSettings() {
+            try {
+                const response = await fetch(`${API_BASE_URL}?action=settings`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    return data.data.loading_time;
+                } else {
+                    return 1; // 默认3秒
+                }
+            } catch (error) {
+                return 1; // 默认3秒
             }
         }
         
@@ -108,17 +127,22 @@
             
             if (embedId) {
                 try {
-                    // 显示3秒加载动画
+                    // 显示加载动画
                     showLoading();
                     
-                    // 等待3秒
-                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    // 获取全局设置
+                    const loadingTime = await fetchSettings();
+                    
+                    // 如果设置了加载时间，等待相应时间
+                    if (loadingTime > 0) {
+                        await new Promise(resolve => setTimeout(resolve, loadingTime * 1000));
+                    }
                     
                     // 从API获取目标URL
-                    const targetUrl = await fetchEmbedInfo(embedId);
+                    const embedData = await fetchEmbedInfo(embedId);
                     
                     // 显示嵌入的网页
-                    showEmbeddedPage(targetUrl);
+                    showEmbeddedPage(embedData.target_url);
                     
                 } catch (error) {
                     showError(error.message);
