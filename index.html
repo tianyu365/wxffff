@@ -9,11 +9,11 @@
     <meta name="imagemode" content="force">
     <meta name="wap-font-scale" content="no">
     <meta name="format-detection" content="telephone=no">
-    <title>网页嵌入器</title>
+    <title></title>
     
     <meta property="og:type" content="website">
-    <meta property="og:title" content="网页嵌入器">
-    <meta property="og:description" content="通过识别码快速嵌入任何网页">
+    <meta property="og:title" content="防洪强开微信">
+    <meta property="og:description" content="通过识别码快速访问微信网页">
     <meta property="og:image" content="">
     
     <link rel="shortcut icon" href="" type="image/x-icon">
@@ -168,16 +168,16 @@
             } else {
                 // 没有参数时显示使用说明
                 document.getElementById('content').innerHTML = `
-                    <div style="text-align:center;padding:50px;background:#fff;margin:20px;border-radius:10px;">
-                        <h2>🌐 网页嵌入器</h2>
-                        <p>使用方法：在URL后添加 ?i=识别码</p>
-                        <p>例如：${window.location.href}?i=abc12345</p>
-                        <p>这样就会嵌入对应的网页</p>
-                        <br>
-                        <p style="color:#666;font-size:14px;">
-                            请先在管理后台创建嵌入记录，获取识别码后使用
-                        </p>
-                    </div>
+                <div style="text-align:center;padding:50px;background:#fff;margin:20px;border-radius:10px;">
+                    <h2>🌐 防洪强开微信</h2>
+                    <p>使用方法：在URL后添加 ?i=识别码</p>
+                    <p>例如：${window.location.href}?i=abc12345</p>
+                    <p>这样就会访问对应的微信网页</p>
+                    <br>
+                    <p style="color:#666;font-size:14px;">
+                        请先在管理后台创建访问记录，获取识别码后使用
+                    </p>
+                </div>
                 `;
             }
         }
