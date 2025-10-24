@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>API代理</title>
+</head>
+<body>
+    <script>
+        // 简单的HTTPS代理，解决混合内容问题
+        const targetUrl = 'http://49.232.99.139:7777/admin/api.php';
+        
+        // 获取URL参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        const id = urlParams.get('id');
+        
+        // 构建API请求URL
+        let apiUrl = targetUrl;
+        if (action) {
+            apiUrl += '?action=' + action;
+            if (id) {
+                apiUrl += '&id=' + id;
+            }
+        }
+        
+        // 发起请求
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                // 返回JSON数据
+                document.body.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            })
+            .catch(error => {
+                document.body.innerHTML = '<pre>{"success":false,"error":"' + error.message + '"}</pre>';
+            });
+    </script>
+</body>
+</html>
