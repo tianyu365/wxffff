@@ -6,33 +6,46 @@
 </head>
 <body>
     <script>
-        // 简单的HTTPS代理，解决混合内容问题
-        const targetUrl = 'http://49.232.99.139:7777/admin/api.php';
-        
-        // 获取URL参数
-        const urlParams = new URLSearchParams(window.location.search);
-        const action = urlParams.get('action');
-        const id = urlParams.get('id');
-        
-        // 构建API请求URL
-        let apiUrl = targetUrl;
-        if (action) {
-            apiUrl += '?action=' + action;
+        // 使用CORS代理服务
+        async function proxyRequest() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const action = urlParams.get('action');
+            const id = urlParams.get('id');
+            
+            if (!action) {
+                document.body.innerHTML = '<pre>{"success":false,"error":"缺少action参数"}</pre>';
+                return;
+            }
+            
+            // 构建目标URL
+            let targetUrl = 'http://49.232.99.139:7777/admin/api.php?action=' + action;
             if (id) {
-                apiUrl += '&id=' + id;
+                targetUrl += '&id=' + id;
+            }
+            
+            try {
+                // 使用CORS代理服务
+                const proxyUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl);
+                
+                const response = await fetch(proxyUrl);
+                const data = await response.text();
+                
+                // 尝试解析JSON
+                try {
+                    const jsonData = JSON.parse(data);
+                    document.body.innerHTML = '<pre>' + JSON.stringify(jsonData, null, 2) + '</pre>';
+                } catch (e) {
+                    // 如果不是JSON，直接显示
+                    document.body.innerHTML = '<pre>' + data + '</pre>';
+                }
+                
+            } catch (error) {
+                document.body.innerHTML = '<pre>{"success":false,"error":"' + error.message + '"}</pre>';
             }
         }
         
-        // 发起请求
-        fetch(apiUrl)
-            .then(response => response.json())
-            .then(data => {
-                // 返回JSON数据
-                document.body.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-            })
-            .catch(error => {
-                document.body.innerHTML = '<pre>{"success":false,"error":"' + error.message + '"}</pre>';
-            });
+        // 页面加载时执行
+        proxyRequest();
     </script>
 </body>
 </html>
