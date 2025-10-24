@@ -1,0 +1,56 @@
+# GitHub Pages 配置文件
+
+# 网站基本信息
+title: 网页嵌入器
+description: 一个简单而强大的网页嵌入工具，可以通过URL参数快速嵌入任何网页
+author: 你的名字
+email: your.email@example.com
+
+# 网站设置
+baseurl: "" # 如果部署在子目录，请填写子目录名
+url: "" # 你的GitHub Pages域名，例如：https://yourusername.github.io
+
+# 构建设置
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+
+# 插件设置
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# SEO设置
+twitter:
+  username: your_twitter_username
+
+# 社交链接
+social:
+  github: your_github_username
+  twitter: your_twitter_username
+  email: your.email@example.com
+
+# 导航菜单
+navigation:
+  - title: 首页
+    url: /
+  - title: 关于
+    url: /#about
+
+# 主题设置（可选）
+theme: minima
+
+# 自定义设置
+custom_settings:
+  # 是否启用评论系统
+  enable_comments: false
+  
+  # 是否显示最后更新时间
+  show_last_modified: true
+  
+  # 是否显示阅读时间
+  show_reading_time: false
+  
+  # 是否启用搜索功能
+  enable_search: false

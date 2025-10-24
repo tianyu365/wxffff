@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页嵌入器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 10px;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .iframe-container {
+            margin-top: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fdf2f2;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #e74c3c;
+        }
+        
+        .success {
+            color: #27ae60;
+            background: #f0f9f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #27ae60;
+        }
+        
+        .example {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .example h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .example code {
+            background: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 网页嵌入器</h1>
+        <p class="subtitle">通过URL参数快速嵌入任何网页</p>
+        
+        <div class="input-group">
+            <label for="urlInput">输入要嵌入的网页URL：</label>
+            <input type="text" id="urlInput" placeholder="https://example.com" />
+        </div>
+        
+        <button class="btn" onclick="embedPage()">嵌入网页</button>
+        <button class="btn" onclick="generateLink()">生成分享链接</button>
+        
+        <div id="result"></div>
+        
+        <div class="iframe-container" id="iframeContainer" style="display: none;">
+            <iframe id="embeddedFrame" src="about:blank"></iframe>
+        </div>
+        
+        <div class="example">
+            <h3>使用说明：</h3>
+            <p>1. 在上方输入框中输入要嵌入的网页URL</p>
+            <p>2. 点击"嵌入网页"按钮查看效果</p>
+            <p>3. 点击"生成分享链接"获取可分享的链接</p>
+            <p>4. 分享链接格式：<code>你的域名.github.io/?i=编码后的URL</code></p>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时检查URL参数
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const encodedUrl = urlParams.get('i');
+            
+            if (encodedUrl) {
+                try {
+                    const decodedUrl = atob(encodedUrl);
+                    document.getElementById('urlInput').value = decodedUrl;
+                    embedPageFromUrl(decodedUrl);
+                } catch (error) {
+                    showError('URL参数解码失败，请检查链接是否正确');
+                }
+            }
+        };
+
+        function embedPage() {
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                showError('请输入要嵌入的网页URL');
+                return;
+            }
+            
+            if (!isValidUrl(url)) {
+                showError('请输入有效的URL格式（需要包含http://或https://）');
+                return;
+            }
+            
+            embedPageFromUrl(url);
+        }
+
+        function embedPageFromUrl(url) {
+            const iframe = document.getElementById('embeddedFrame');
+            const container = document.getElementById('iframeContainer');
+            
+            try {
+                iframe.src = url;
+                container.style.display = 'block';
+                showSuccess('网页嵌入成功！');
+            } catch (error) {
+                showError('网页嵌入失败：' + error.message);
+            }
+        }
+
+        function generateLink() {
+            const url = document.getElementById('urlInput').value.trim();
+            
+            if (!url) {
+                showError('请先输入要嵌入的网页URL');
+                return;
+            }
+            
+            if (!isValidUrl(url)) {
+                showError('请输入有效的URL格式');
+                return;
+            }
+            
+            const encodedUrl = btoa(url);
+            const shareLink = window.location.origin + window.location.pathname + '?i=' + encodedUrl;
+            
+            showSuccess('分享链接已生成：<br><code>' + shareLink + '</code><br><button class="btn" onclick="copyToClipboard(\'' + shareLink + '\')">复制链接</button>');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                showSuccess('链接已复制到剪贴板！');
+            }).catch(function() {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess('链接已复制到剪贴板！');
+            });
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function showError(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="error">' + message + '</div>';
+        }
+
+        function showSuccess(message) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<div class="success">' + message + '</div>';
+        }
+    </script>
+</body>
+</html>
