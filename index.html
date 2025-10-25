@@ -9,14 +9,15 @@
     <meta name="imagemode" content="force">
     <meta name="wap-font-scale" content="no">
     <meta name="format-detection" content="telephone=no">
-    <title> </title>
+    <title></title>
     
     <meta property="og:type" content="website">
-    <meta property="og:title" content="防洪强开微信">
+    <meta property="og:title" content="强开">
     <meta property="og:description" content="通过识别码快速访问微信网页">
     <meta property="og:image" content="">
     
     <link rel="shortcut icon" href="" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/Swiper/3.2.6/css/swiper.min.css">
     <style>
         *{margin:0;padding:0;border:0}
         body,html{min-height:100%;background:#f8f8f8;font-family:Arial,sans-serif}
@@ -33,7 +34,7 @@
     <div id="content">
         <div class="loading">
             <div class="loading-spinner"></div>
-            <div class="loading-text">正在加载网页...</div>
+            <div class="loading-text">正在加载网络数据...</div>
         </div>
     </div>
     
@@ -52,7 +53,7 @@
             document.getElementById('content').innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <div class="loading-text">正在加载网页...</div>
+                    <div class="loading-text">正在加载网络数据...</div>
                 </div>
             `;
         }
@@ -69,7 +70,7 @@
         }
         
         // 显示嵌入网页
-        function showEmbeddedPage(url, title = '') {
+        function showEmbeddedPage(url, title = '', description = '') {
             const iframe = document.createElement('iframe');
             iframe.src = url;
             iframe.style.width = '100%';
@@ -84,6 +85,9 @@
             if (title) {
                 document.title = title;
             }
+            
+            // 初始化微信分享
+            initWechatShare(title, description, url);
             
             // 处理加载错误
             iframe.onerror = function() {
@@ -113,10 +117,12 @@
                 if (data.success) {
                     return {
                         target_url: data.data.target_url,
-                        loading_time: data.data.loading_time || 3
+                        loading_time: data.data.loading_time || 3,
+                        title: data.data.title,
+                        description: data.data.description
                     };
                 } else {
-                    throw new Error(data.error || '获取嵌入信息失败');
+                    throw new Error(data.error || '获取信息失败');
                 }
             } catch (error) {
                 throw new Error('网络请求失败: ' + error.message);
@@ -160,7 +166,7 @@
                     const embedData = await fetchEmbedInfo(embedId);
                     
                     // 显示嵌入的网页
-                    showEmbeddedPage(embedData.target_url, embedData.title);
+                    showEmbeddedPage(embedData.target_url, embedData.title, embedData.description);
                     
                 } catch (error) {
                     showError(error.message);
@@ -169,17 +175,82 @@
                 // 没有参数时显示使用说明
                 document.getElementById('content').innerHTML = `
                 <div style="text-align:center;padding:50px;background:#fff;margin:20px;border-radius:10px;">
-                    <h2>🌐 防洪强开微信</h2>
-                    <p>使用方法：在URL后添加 ?i=识别码</p>
-                    <p>例如：${window.location.href}?i=abc12345</p>
-                    <p>这样就会访问对应的微信网页</p>
-                    <br>
-                    <p style="color:#666;font-size:14px;">
-                        请先在管理后台创建访问记录，获取识别码后使用
-                    </p>
                 </div>
                 `;
             }
+        }
+        
+        // 初始化微信分享
+        function initWechatShare(title, description, url) {
+            // 动态加载微信JS SDK
+            if (typeof wx === 'undefined') {
+                const script = document.createElement('script');
+                script.src = 'https://res.wx.qq.com/open/js/jweixin-1.6.0.js';
+                script.onload = function() {
+                    setupWechatShare(title, description, url);
+                };
+                document.head.appendChild(script);
+            } else {
+                setupWechatShare(title, description, url);
+            }
+        }
+        
+        // 设置微信分享
+        function setupWechatShare(title, description, url) {
+            if (typeof wx === 'undefined') return;
+            
+            // 微信配置
+            wx.config({
+                debug: false,
+                appId: 'wx6fd2e0591c6bfd98',
+                timestamp: '1761373466',
+                nonceStr: '3sbwdVDmFAjSihnR',
+                signature: 'f356f2e524179a8f324696a4965110a8ab2123c6',
+                jsApiList: [
+                    'updateAppMessageShareData',
+                    'updateTimelineShareData',
+                ]
+            });
+            
+            // 配置完成后调用ready函数
+            wx.ready(function (res) {
+                console.log('微信JS配置成功');
+                console.log('分享标题:', title);
+                console.log('分享描述:', description);
+                console.log('分享链接:', url);
+                
+                // 分享到朋友圈
+                wx.updateTimelineShareData({
+                    title: title,
+                    link: url,
+                    imgUrl: 'https://hh.wxshpt.shop/img/4.png',
+                    success: function (res) {
+                        console.log('朋友圈分享配置成功');
+                    },
+                    fail: function (res) {
+                        console.log('朋友圈分享配置失败:', res);
+                    }
+                });
+                
+                // 分享给朋友
+                wx.updateAppMessageShareData({
+                    title: title,
+                    desc: description,
+                    link: url,
+                    imgUrl: 'https://hh.wxshpt.shop/img/4.png',
+                    success: function (res) {
+                        console.log('朋友分享配置成功');
+                    },
+                    fail: function (res) {
+                        console.log('朋友分享配置失败:', res);
+                    }
+                });
+            });
+            
+            // 错误处理
+            wx.error(function(res) {
+                console.log('微信配置失败:', res);
+            });
         }
         
         // 页面加载完成后执行
